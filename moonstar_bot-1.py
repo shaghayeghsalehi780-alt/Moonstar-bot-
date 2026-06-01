@@ -305,5 +305,15 @@ def main():
     print("🌟 Moonstar Bot läuft...")
     app.run_polling()
 
+from threading import Thread
+import http.server
+
+def run_server():
+    server = http.server.HTTPServer(('0.0.0.0', 10000), http.server.BaseHTTPRequestHandler)
+    server.serve_forever()
+    
+Thread(target=run_server, daemon=True).start()
+
 if __name__ == "__main__":
-    main()
+   main()
+

@@ -3,7 +3,7 @@ import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
-TOKEN = "8653367660:AAFDjtAJqjert703n7VOwDDeDGxyzSINGhs"
+TOKEN = "8653367660:AAFcV9OxM5wJqhmOZravVAdfsCPd1qWSCQo"
 ADMIN_USERNAME = "@MoonstarSalehi"
 CRYPTO_PAY_TOKEN = "590875:AAsbgtzkD2xmzZ12eTbF4cWF3QkK8iguHN1"
 CRYPTO_PAY_API = "https://pay.crypt.bot/api"

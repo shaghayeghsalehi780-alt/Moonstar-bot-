@@ -1,13 +1,36 @@
 import logging
+import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
-import os
-TOKEN = os.environ.get("BOT_TOKEN")
-ADMIN_ID = 8320580546
+
+TOKEN = "8653367660:AAFDjtAJqjert703n7VOwDDeDGxyzSINGhs"
 ADMIN_USERNAME = "@MoonstarSalehi"
+CRYPTO_PAY_TOKEN = "590875:AAsbgtzkD2xmzZ12eTbF4cWF3QkK8iguHN1"
+CRYPTO_PAY_API = "https://pay.crypt.bot/api"
 
 logging.basicConfig(level=logging.INFO)
 
+# ─── Crypto Pay ───────────────────────────────────────────────
+async def create_invoice(amount: str, description: str) -> str | None:
+    """Invoice in CryptoBot erstellen und Zahlungslink zurückgeben."""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{CRYPTO_PAY_API}/createInvoice",
+            headers={"Crypto-Pay-API-Token": CRYPTO_PAY_TOKEN},
+            json={
+                "asset": "USDT",
+                "amount": amount,
+                "description": description,
+                "paid_btn_name": "callback",
+                "paid_btn_url": "https://t.me/MoonstarSalehiBot",
+            }
+        )
+        data = response.json()
+        if data.get("ok"):
+            return data["result"]["bot_invoice_url"]
+        return None
+
+# ─── Start ────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🗣️ Kurse & Preise", callback_data="kurse")],
@@ -15,16 +38,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("⭐ Bewertungen", callback_data="bewertungen")],
         [InlineKeyboardButton("📩 Anmeldung", callback_data="anmeldung")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
         "🌟 *Willkommen bei Moonstar Salehi!*\n\n"
         "Ich bin dein persönlicher Deutschkurs-Assistent.\n"
         "Was möchtest du wissen?\n\n"
         "👇 Wähle eine Option:",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+# ─── Kurse ────────────────────────────────────────────────────
 async def kurse(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -36,21 +59,22 @@ async def kurse(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🗓️ Monatlicher Lernplan", callback_data="kurs_plan")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="start")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "📚 *Unsere Kurse*\n\nWähle einen Kurs für mehr Details:",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+# ─── Kurs-Detailseiten ────────────────────────────────────────
 async def kurs_sprechen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("📩 Jetzt anmelden", callback_data="anmeldung")],
+        [InlineKeyboardButton("👤 Einzelunterricht bezahlen — 49$", callback_data="pay_sprechen_privat")],
+        [InlineKeyboardButton("👥 Gruppenunterricht bezahlen — 35$", callback_data="pay_sprechen_gruppe")],
+        [InlineKeyboardButton("📩 Erst anmelden", callback_data="anmeldung")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "🗣️ *Sprechkurs — 14 Einheiten*\n\n"
         "⏰ 90 Minuten pro Einheit\n"
@@ -65,17 +89,17 @@ async def kurs_sprechen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👥 Gruppenunterricht: *35$*\n\n"
         "🌟 *Moonstar Salehi | @MoonstarSalehi*",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def kurs_telc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("📩 Jetzt anmelden", callback_data="anmeldung")],
+        [InlineKeyboardButton("👤 Einzelunterricht bezahlen — 91$", callback_data="pay_telc_privat")],
+        [InlineKeyboardButton("📩 Erst anmelden", callback_data="anmeldung")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "🗣️ *Sprechkurs + Telc B2 — 26 Einheiten*\n\n"
         "⏰ 90 Minuten pro Einheit\n"
@@ -89,50 +113,43 @@ async def kurs_telc(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👤 Einzelunterricht: *91$*\n\n"
         "🌟 *Moonstar Salehi | @MoonstarSalehi*",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def kurs_wortschatz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("📩 Jetzt anmelden", callback_data="anmeldung")],
+        [InlineKeyboardButton("👤 Einzelunterricht bezahlen — 104$", callback_data="pay_wortschatz_privat")],
+        [InlineKeyboardButton("📩 Erst anmelden", callback_data="anmeldung")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "📚 *Wortschatz B2/C1 — 26 Einheiten*\n\n"
         "⏰ 90 Minuten pro Einheit\n\n"
         "📖 *Jede Einheit hat 3 Teile:*\n\n"
         "1️⃣ *15 Min — Wörter aus dem Buch Unsicher B2/C1*\n"
         "• 50–100 Wörter pro Thema\n"
-        "• Synonyme & Bedeutungen\n"
-        "• Beispiele aus dem Alltag\n\n"
+        "• Synonyme & Bedeutungen\n\n"
         "2️⃣ *15 Min — Podcast zum gleichen Thema*\n"
-        "• Aktives Zuhören\n"
-        "• So spricht man im echten Leben\n\n"
-        "3️⃣ *60 Min — Freies Gespräch mit den gelernten Wörtern*\n"
-        "• Wörter direkt anwenden\n"
-        "• Natürlich und sicher sprechen\n\n"
-        "💡 *Warum diese Methode?*\n"
-        "Du begegnest jedem Wort 3x in einer Einheit:\n"
-        "lesen → hören → sprechen\n"
-        "So bleibt es für immer im Gedächtnis! 🧠\n\n"
+        "• Aktives Zuhören\n\n"
+        "3️⃣ *60 Min — Freies Gespräch*\n"
+        "• Wörter direkt anwenden\n\n"
         "💰 *Preis:*\n"
         "👤 Einzelunterricht: *104$*\n\n"
         "🌟 *Moonstar Salehi | @MoonstarSalehi*",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def kurs_workshop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("📩 Jetzt anmelden", callback_data="anmeldung")],
+        [InlineKeyboardButton("💳 Jetzt bezahlen — 7$", callback_data="pay_workshop")],
+        [InlineKeyboardButton("📩 Erst anmelden", callback_data="anmeldung")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "🎯 *Prüfungsworkshop Telc — 1 Einheit*\n\n"
         "⏰ 90 Minuten\n\n"
@@ -145,38 +162,87 @@ async def kurs_workshop(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🎯 *7$*\n\n"
         "🌟 *Moonstar Salehi | @MoonstarSalehi*",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def kurs_plan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("📩 Jetzt anmelden", callback_data="anmeldung")],
+        [InlineKeyboardButton("💳 Jetzt bezahlen — 5$", callback_data="pay_plan")],
+        [InlineKeyboardButton("📩 Erst anmelden", callback_data="anmeldung")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "🗓️ *Monatlicher Lernplan*\n\n"
         "📌 *Was bekommst du?*\n"
         "• Persönlicher Plan für 1 Monat\n"
         "• Prüfungsvorbereitung & Sprachtraining\n"
-        "• Klare Ziele & Strategie\n"
-        "• Für Anfänger und Fortgeschrittene\n\n"
+        "• Klare Ziele & Strategie\n\n"
         "💰 *Preis:*\n"
         "🗓️ *5$ pro Monat*\n\n"
         "🌟 *Moonstar Salehi | @MoonstarSalehi*",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+# ─── Zahlungen ────────────────────────────────────────────────
+PAYMENT_MAP = {
+    "pay_sprechen_privat":  ("49",  "Sprechkurs 14 Einheiten — Einzelunterricht"),
+    "pay_sprechen_gruppe":  ("35",  "Sprechkurs 14 Einheiten — Gruppenunterricht"),
+    "pay_telc_privat":      ("91",  "Sprechkurs + Telc B2 26 Einheiten — Einzelunterricht"),
+    "pay_wortschatz_privat":("104", "Wortschatz B2/C1 26 Einheiten — Einzelunterricht"),
+    "pay_workshop":         ("7",   "Prüfungsworkshop Telc"),
+    "pay_plan":             ("5",   "Monatlicher Lernplan"),
+}
+
+async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+
+    if data not in PAYMENT_MAP:
+        return
+
+    amount, description = PAYMENT_MAP[data]
+    await query.edit_message_text("⏳ Zahlungslink wird erstellt...")
+
+    pay_url = await create_invoice(amount, description)
+
+    if pay_url:
+        user = query.from_user
+        # Admin benachrichtigen
+        await context.bot.send_message(
+            chat_id=ADMIN_USERNAME,
+            text=f"💳 Zahlung gestartet!\n"
+                 f"👤 {user.first_name} (@{user.username})\n"
+                 f"📦 {description}\n"
+                 f"💰 {amount} USDT"
+        )
+        keyboard = [
+            [InlineKeyboardButton("💳 Jetzt bezahlen", url=pay_url)],
+            [InlineKeyboardButton("🔙 Zurück", callback_data="kurse")],
+        ]
+        await query.edit_message_text(
+            f"✅ *Dein Zahlungslink ist bereit!*\n\n"
+            f"📦 *{description}*\n"
+            f"💰 *{amount} USDT*\n\n"
+            f"Klicke unten auf den Button und bezahle sicher über CryptoBot.\n\n"
+            f"Nach der Zahlung meldet sich @MoonstarSalehi bei dir! 🌟",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    else:
+        await query.edit_message_text(
+            "❌ Fehler beim Erstellen des Zahlungslinks.\n"
+            "Bitte schreib direkt an @MoonstarSalehi.",
+        )
+
+# ─── Über uns / Bewertungen / Anmeldung ──────────────────────
 async def ueber(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    keyboard = [
-        [InlineKeyboardButton("🔙 Zurück", callback_data="start")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    keyboard = [[InlineKeyboardButton("🔙 Zurück", callback_data="start")]]
     await query.edit_message_text(
         "🌟 *Über Moonstar Salehi*\n\n"
         "Ich bin Shaghayegh Salehi — Deutschlehrerin mit Spezialisierung auf Sprechen.\n\n"
@@ -187,7 +253,7 @@ async def ueber(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🎙️ Podcast: @deutscherpod\n"
         "📩 Kontakt: @MoonstarSalehi",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def bewertungen(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -197,7 +263,6 @@ async def bewertungen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("✍️ Bewertung schreiben", callback_data="bewertung_schreiben")],
         [InlineKeyboardButton("🔙 Zurück", callback_data="start")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "⭐ *Bewertungen unserer Schüler*\n\n"
         "⭐⭐⭐⭐⭐ Labarania\n"
@@ -206,36 +271,29 @@ async def bewertungen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "_\"Telc B2: 281/300 — Die beste Lehrerin!\"_\n\n"
         "⭐⭐⭐⭐⭐ Ameneh\n"
         "_\"Sprechen macht jetzt viel mehr Spaß!\"_\n\n"
-        "📺 Alle Bewertungen auf unserem Kanal:\n"
-        "👉 [DankeMomente](https://t.me/DankeMomente)\n\n"
+        "📺 Alle Bewertungen: [DankeMomente](https://t.me/DankeMomente)\n\n"
         "📩 Hast du auch einen Kurs gemacht? Schreib deine Bewertung!",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def bewertung_schreiben(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    keyboard = [
-        [InlineKeyboardButton("🔙 Zurück", callback_data="bewertungen")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    keyboard = [[InlineKeyboardButton("🔙 Zurück", callback_data="bewertungen")]]
     context.user_data["waiting_for_review"] = True
     await query.edit_message_text(
         "✍️ *Schreib deine Bewertung*\n\n"
         "Schreib einfach deine Meinung!\n\n"
         "Beispiel: ⭐⭐⭐⭐⭐ Der Kurs hat mir sehr geholfen!",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def anmeldung(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    keyboard = [
-        [InlineKeyboardButton("🔙 Zurück", callback_data="start")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    keyboard = [[InlineKeyboardButton("🔙 Zurück", callback_data="start")]]
     await query.edit_message_text(
         "📩 *Anmeldung*\n\n"
         "Schreib direkt an:\n"
@@ -243,7 +301,7 @@ async def anmeldung(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Oder schick mir hier eine Nachricht!\n\n"
         "🌟 Wir freuen uns auf dich!",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 async def back_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -255,16 +313,16 @@ async def back_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("⭐ Bewertungen", callback_data="bewertungen")],
         [InlineKeyboardButton("📩 Anmeldung", callback_data="anmeldung")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
         "🌟 *Willkommen bei Moonstar Salehi!*\n\n"
         "Ich bin dein persönlicher Deutschkurs-Assistent.\n"
         "Was möchtest du wissen?\n\n"
         "👇 Wähle eine Option:",
         parse_mode="Markdown",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+# ─── Nachrichten ──────────────────────────────────────────────
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text
@@ -272,15 +330,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("waiting_for_review"):
         context.user_data["waiting_for_review"] = False
         await context.bot.send_message(
-            chat_id=ADMIN_ID,
+            chat_id=ADMIN_USERNAME,
             text=f"⭐ Neue Bewertung von {user.first_name} (@{user.username}):\n\n{text}"
         )
-        await update.message.reply_text(
-            "✅ Danke für deine Bewertung! 🌟"
-        )
+        await update.message.reply_text("✅ Danke für deine Bewertung! 🌟")
     else:
         await context.bot.send_message(
-            chat_id=ADMIN_ID,
+            chat_id=ADMIN_USERNAME,
             text=f"📩 Neue Nachricht von {user.first_name} (@{user.username}):\n\n{text}"
         )
         await update.message.reply_text(
@@ -288,6 +344,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📩 @MoonstarSalehi meldet sich bald. 🌟"
         )
 
+# ─── Main ─────────────────────────────────────────────────────
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
@@ -302,19 +359,12 @@ def main():
     app.add_handler(CallbackQueryHandler(bewertung_schreiben, pattern="^bewertung_schreiben$"))
     app.add_handler(CallbackQueryHandler(anmeldung, pattern="^anmeldung$"))
     app.add_handler(CallbackQueryHandler(back_start, pattern="^start$"))
+    app.add_handler(CallbackQueryHandler(handle_payment, pattern="^pay_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     print("🌟 Moonstar Bot läuft...")
     app.run_polling()
 
-from threading import Thread
-import http.server
-
-def run_server():
-    server = http.server.HTTPServer(('0.0.0.0', 8080), http.server.BaseHTTPRequestHandler)
-    server.serve_forever()
-    
-Thread(target=run_server, daemon=True).start()
-
 if __name__ == "__main__":
-   main()
-
+    main()
+                
+        

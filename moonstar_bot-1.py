@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 import os
 TOKEN = os.environ.get("BOT_TOKEN")
+ADMIN_ID = 260928984
 ADMIN_USERNAME = "@MoonstarSalehi"
 
 logging.basicConfig(level=logging.INFO)
@@ -271,7 +272,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("waiting_for_review"):
         context.user_data["waiting_for_review"] = False
         await context.bot.send_message(
-            chat_id=ADMIN_USERNAME,
+            chat_id=ADMIN_ID,
             text=f"⭐ Neue Bewertung von {user.first_name} (@{user.username}):\n\n{text}"
         )
         await update.message.reply_text(
@@ -279,7 +280,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     else:
         await context.bot.send_message(
-            chat_id=ADMIN_USERNAME,
+            chat_id=ADMIN_ID,
             text=f"📩 Neue Nachricht von {user.first_name} (@{user.username}):\n\n{text}"
         )
         await update.message.reply_text(
